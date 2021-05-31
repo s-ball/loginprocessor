@@ -22,8 +22,8 @@ class LoginProcessor(BaseHandler):
     def http_response(self, req: Request, resp: HTTPResponse) -> HTTPResponse:
         if resp.getcode() == 200 and (self.url is None
                                       or resp.geturl().startswith(self.url)):
-            length = resp.length
             t = resp.read()
+            length = len(t)
             soup = BeautifulSoup(t, features='html.parser')
             attrs = {} if self.form_id is None else {'id': self.form_id}
             for form in soup.find_all('form', **attrs, ):
@@ -46,7 +46,19 @@ class LoginProcessor(BaseHandler):
                 return self.parent.open(ans, timeout=getattr(
                     req, 'timeout', socket.getdefaulttimeout()))
             resp.fp = io.BytesIO(t)
+            # remove any chunked header and reset length
+            try:
+                resp.headers.replace_header('Transfer-Encoding', 'identity')
+            except KeyError:
+                pass
+            try:
+                resp.headers.replace_header('Content-Length', str(length))
+            except KeyError:
+                resp.headers.add_header('Content-Length', str(length))
+            # the chunked parameter is not really documented
+            #  but it does control chunked-encoding handling
             resp.length = length
+            resp.chunked = False
         return resp
 
     https_response = http_response

@@ -5,6 +5,7 @@ import urllib.request
 
 from loginprocessor.loginprocessor import LoginProcessor
 from unittest.mock import Mock
+import email.parser
 
 
 class TestLoginProcessor(unittest.TestCase):
@@ -18,7 +19,8 @@ class TestLoginProcessor(unittest.TestCase):
         resp = Mock(http.client.HTTPResponse, wraps=io.BytesIO(b),
                     getcode=Mock(return_value=200),
                     geturl=Mock(return_value='/foo'),
-                    length=len(b))
+                    length=len(b),
+                    headers = email.parser.Parser(_class=http.client.HTTPMessage).parsestr(''))
         r = lp.http_response(urllib.request.Request('http://foo.org/foo'), resp)
         self.assertIs(resp, r)
 
@@ -28,7 +30,8 @@ class TestLoginProcessor(unittest.TestCase):
         resp = Mock(http.client.HTTPResponse, wraps=io.BytesIO(b),
                     getcode=Mock(return_value=200),
                     geturl=Mock(return_value='/foo'),
-                    length=len(b))
+                    length=len(b),
+                    headers = email.parser.Parser(_class=http.client.HTTPMessage).parsestr(''))
         r = lp.http_response(urllib.request.Request('http://foo.org/foo'), resp)
         self.assertIs(resp, r)
 
@@ -51,7 +54,8 @@ class TestLoginProcessor(unittest.TestCase):
         resp = Mock(http.client.HTTPResponse, wraps=io.BytesIO(b),
                     getcode=Mock(return_value=200),
                     geturl=Mock(return_value='/foo'),
-                    length=len(b))
+                    length=len(b),
+                    headers = email.parser.Parser(_class=http.client.HTTPMessage).parsestr(''))
         r = lp.http_response(urllib.request.Request('http://foo.org/foo'), resp)
         self.assertIs(resp, r)
         self.assertEqual(b, r.fp.read())
